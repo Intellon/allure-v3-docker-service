@@ -1,6 +1,6 @@
 # Allure Docker Service
 
-[![Allure Docker Service Workflow](https://github.com/Intellon/allure-v3-docker-service/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/Intellon/allure-docker-service/actions)
+[![Allure Docker Service Workflow](https://github.com/Intellon/allure-v3-docker-service/actions/workflows/docker-publish.yml/badge.svg?branch=main)](https://github.com/Intellon/allure-docker-service/actions?query=branch%3Amain)
 
 Docker container for [Allure 3](https://github.com/allure-framework/allure3) test reporting. Automatically detects new test results and generates reports, or accepts results via REST API.
 
