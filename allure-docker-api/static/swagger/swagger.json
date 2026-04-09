@@ -2,14 +2,14 @@
    "openapi":"3.0.0",
    "info":{
       "description":"Interact with Allure Docker container",
-      "version":"1.0.0",
+      "version":"3.3.1",
       "title":"Allure Docker Service API",
       "contact":{
-         "email":"fescobar.systems@gmail.com"
+         "email":"development@intellon.io"
       },
       "license":{
-         "name":"MIT",
-         "url":"https://opensource.org/licenses/MIT"
+         "name":"Apache 2.0",
+         "url":"https://www.apache.org/licenses/LICENSE-2.0"
       }
    },
    "servers":[
@@ -37,7 +37,7 @@
             "tags":[
                "Info"
             ],
-            "summary":"Get Allure version (from version 2.12.1)",
+            "summary":"Get Allure version",
             "responses":{
                "200":{
                   "description":"OK",
@@ -85,7 +85,7 @@
             "tags":[
                "Action"
             ],
-            "summary":"Get Allure config (from version 2.13.5)",
+            "summary":"Get Allure config",
             "responses":{
                "200":{
                   "description":"OK",
@@ -107,7 +107,7 @@
             "tags":[
                "Action"
             ],
-            "summary":"Get latest report (from version 2.13.3)",
+            "summary":"Get latest report",
             "parameters":[
                {
                   "in":"query",
@@ -138,7 +138,7 @@
             "tags":[
                "Action"
             ],
-            "summary":"Send results files (from version 2.12.1)",
+            "summary":"Send results files",
             "consumes":[
                "application/json",
                "multipart/form-data"
@@ -280,7 +280,7 @@
             "tags":[
                "Action"
             ],
-            "summary":"Clean Allure results (from version 2.12.1)",
+            "summary":"Clean Allure results",
             "parameters":[
                {
                   "in":"query",
@@ -317,7 +317,7 @@
             "tags":[
                "Action"
             ],
-            "summary":"Clean Allure history & trends (from version 2.12.1)",
+            "summary":"Clean Allure history & trends",
             "parameters":[
                {
                   "in":"query",
@@ -354,7 +354,7 @@
             "tags":[
                "Action"
             ],
-            "summary":"Render emailable Allure report (from version 2.12.1)",
+            "summary":"Render emailable Allure report",
             "parameters":[
                {
                   "in":"query",
@@ -391,7 +391,7 @@
             "tags":[
                "Action"
             ],
-            "summary":"Export emailable Allure report (from version 2.12.1)",
+            "summary":"Export emailable Allure report",
             "parameters":[
                {
                   "in":"query",
@@ -428,7 +428,7 @@
             "tags":[
                "Action"
             ],
-            "summary":"Export Allure report (from version 2.13.1)",
+            "summary":"Export Allure report",
             "parameters":[
                {
                   "in":"query",
@@ -465,7 +465,7 @@
             "tags":[
                "Project"
             ],
-            "summary":"Create a new project (from version 2.13.3)",
+            "summary":"Create a new project",
             "consumes":[
                "application/json"
             ],
@@ -504,7 +504,7 @@
             "tags":[
                "Project"
             ],
-            "summary":"Get all projects (from version 2.13.3)",
+            "summary":"Get all projects",
             "produces":[
                "application/json"
             ],
@@ -529,7 +529,7 @@
             "tags":[
                "Project"
             ],
-            "summary":"Delete an existent project (from version 2.13.3)",
+            "summary":"Delete an existent project",
             "parameters":[
                {
                   "in":"path",
@@ -569,7 +569,7 @@
             "tags":[
                "Project"
             ],
-            "summary":"Get an existent project (from version 2.13.3)",
+            "summary":"Get an existent project",
             "parameters":[
                {
                   "in":"path",
@@ -611,7 +611,7 @@
             "tags":[
                "Project"
             ],
-            "summary":"Get reports (from version 2.13.3)",
+            "summary":"Get reports",
             "parameters":[
                {
                   "in":"path",
@@ -670,7 +670,7 @@
             "tags":[
                "Project"
             ],
-            "summary":"Search projects (from version 2.13.5)",
+            "summary":"Search projects",
             "parameters":[
                {
                   "in":"query",

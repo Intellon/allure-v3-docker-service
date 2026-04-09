@@ -8,12 +8,17 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to build and publish (e.g. 3.4.0)'
+        description: 'Version to build and publish (e.g. 3.3.1)'
         required: true
-        default: '3.4.0'
+        default: '3.3.1'
         type: string
       tag_latest:
-        description: 'Tag as latest?'
+        description: 'Also tag as latest?'
+        required: true
+        default: true
+        type: boolean
+      create_release:
+        description: 'Create GitHub Release?'
         required: true
         default: true
         type: boolean
@@ -21,7 +26,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: intellon/allure-docker-service
-  ALLURE_RELEASE: 3.4.0
+  ALLURE_RELEASE: 3.3.1
 
 jobs:
   build_release:
@@ -134,6 +139,7 @@ jobs:
           docker logout ${REGISTRY}
 
   manifest_release:
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     needs: build_release
     permissions:
@@ -174,3 +180,46 @@ jobs:
         if: success() && (startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch')
         run: |
           docker logout ${REGISTRY}
+
+  github_release:
+    runs-on: ubuntu-latest
+    needs: [build_release, manifest_release]
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.create_release)
+    permissions:
+      contents: write
+    steps:
+      - name: Pulling code
+        uses: actions/checkout@v4
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BUILD_VERSION=${{ needs.build_release.outputs.build_version }}
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            TAG="v${BUILD_VERSION}"
+            git tag "$TAG" || true
+            git push origin "$TAG" || true
+          else
+            TAG=${GITHUB_REF#refs/tags/}
+          fi
+
+          PRERELEASE=""
+          if [[ "$TAG" == *"beta"* ]]; then
+            PRERELEASE="--prerelease"
+          fi
+
+          gh release create "$TAG" \
+            --title "Allure Docker Service ${BUILD_VERSION}" \
+            --notes "## Docker Image
+
+          \`\`\`sh
+          docker pull ${REGISTRY}/${IMAGE_NAME}:${BUILD_VERSION}
+          \`\`\`
+
+          **Allure Report:** ${BUILD_VERSION}
+          **Architectures:** amd64, arm64
+          **Registry:** \`${REGISTRY}/${IMAGE_NAME}\`" \
+            $PRERELEASE \
+            --verify-tag || true

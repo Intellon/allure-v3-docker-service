@@ -14,7 +14,7 @@ Docker container for [Allure 3](https://github.com/allure-framework/allure3) tes
 ```sh
 git clone https://github.com/Intellon/allure-docker-service.git
 cd allure-docker-service
-docker build -f docker/Dockerfile -t allure-docker-service --build-arg ALLURE_RELEASE=3.4.0 .
+docker build -f docker/Dockerfile -t allure-docker-service --build-arg ALLURE_RELEASE=3.3.1 .
 docker run -d --name allure -p 7272:5050 \
   -e CHECK_RESULTS_EVERY_SECONDS=3 \
   -e KEEP_HISTORY=1 \
@@ -234,7 +234,7 @@ curl http://localhost:7272/allure-docker-service/generate-report -b cookies.txt
 
 ### Build image
 ```sh
-docker build -f docker/Dockerfile -t allure-docker-service --build-arg ALLURE_RELEASE=3.4.0 .
+docker build -f docker/Dockerfile -t allure-docker-service --build-arg ALLURE_RELEASE=3.3.1 .
 ```
 
 ### Run container
@@ -275,17 +275,17 @@ Create a PAT at https://github.com/settings/tokens with `write:packages` scope.
 ### 2. Build and tag
 ```sh
 docker build --no-cache \
-  -t ghcr.io/intellon/allure-docker-service:3.4.0 \
+  -t ghcr.io/intellon/allure-docker-service:3.3.1 \
   -f docker/Dockerfile \
-  --build-arg ALLURE_RELEASE=3.4.0 \
-  --build-arg BUILD_VERSION=3.4.0 \
+  --build-arg ALLURE_RELEASE=3.3.1 \
+  --build-arg BUILD_VERSION=3.3.1 \
   .
-docker tag ghcr.io/intellon/allure-docker-service:3.4.0 ghcr.io/intellon/allure-docker-service:latest
+docker tag ghcr.io/intellon/allure-docker-service:3.3.1 ghcr.io/intellon/allure-docker-service:latest
 ```
 
 ### 3. Push
 ```sh
-docker push ghcr.io/intellon/allure-docker-service:3.4.0
+docker push ghcr.io/intellon/allure-docker-service:3.3.1
 docker push ghcr.io/intellon/allure-docker-service:latest
 ```
 
@@ -294,10 +294,10 @@ docker push ghcr.io/intellon/allure-docker-service:latest
 docker buildx create --name multiarch --use
 docker buildx build --no-cache \
   --platform linux/amd64,linux/arm64 \
-  -t ghcr.io/intellon/allure-docker-service:3.4.0 \
+  -t ghcr.io/intellon/allure-docker-service:3.3.1 \
   -t ghcr.io/intellon/allure-docker-service:latest \
   -f docker/Dockerfile \
-  --build-arg ALLURE_RELEASE=3.4.0 \
+  --build-arg ALLURE_RELEASE=3.3.1 \
   --push \
   .
 ```
@@ -315,13 +315,13 @@ The pipeline runs only on the `main` branch. Two ways to publish:
 
 ### Automatic (via Git tag)
 ```sh
-git tag v3.4.0
-git push origin v3.4.0
+git tag v3.3.1
+git push origin v3.3.1
 ```
 
 ### Manual (via GitHub UI)
 1. Go to `Actions > Allure Docker Service Workflow > Run workflow`
-2. Enter the version (e.g. `3.4.0`)
+2. Enter the version (e.g. `3.3.1`)
 3. Check "Tag as latest?" if desired
 4. Click "Run workflow"
 

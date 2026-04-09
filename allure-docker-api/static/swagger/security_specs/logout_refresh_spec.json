@@ -3,7 +3,7 @@
       "tags":[
          "Security"
       ],
-      "summary":"Logout Refresh Token (from version 2.13.5)",
+      "summary":"Logout Refresh Token",
       "parameters":[
          {
             "in":"header",

@@ -2,3 +2,8 @@ allure-docker-api/static/swagger/swagger_security.json
 .data/
 /.idea/
 /docs/superpowers/
+__pycache__/
+.pytest_cache/
+*.pyc
+/allure-results/
+/allure-report/

@@ -64,7 +64,12 @@ fi
 
 echo "Generating report for PROJECT_ID: $PROJECT_ID"
 rm -rf $STATIC_CONTENT_PROJECTS/$PROJECT_ID/reports/latest/*
-allure generate $RESULTS_DIRECTORY -o $STATIC_CONTENT_PROJECTS/$PROJECT_ID/reports/latest
+# Allure 3 uses glob pattern **/allure-results to find results directories
+# Create a temp wrapper with an 'allure-results' dir pointing to actual results
+ALLURE_WRAPPER=$(mktemp -d)
+cp -rL $RESULTS_DIRECTORY $ALLURE_WRAPPER/allure-results
+allure generate --cwd $ALLURE_WRAPPER -c $ROOT/allurerc.json -o $STATIC_CONTENT_PROJECTS/$PROJECT_ID/reports/latest
+rm -rf $ALLURE_WRAPPER
 if [ "$OPTIMIZE_STORAGE" == "1" ] ; then
     REPORT_DIR=$STATIC_CONTENT_PROJECTS/$PROJECT_ID/reports/latest
     for ASSET in app.js styles.css; do

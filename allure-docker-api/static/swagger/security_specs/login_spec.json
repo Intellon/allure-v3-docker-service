@@ -3,7 +3,7 @@
        "tags":[
           "Security"
        ],
-       "summary":"Login (from version 2.13.5)",
+       "summary":"Login",
        "consumes":[
           "application/json"
        ],

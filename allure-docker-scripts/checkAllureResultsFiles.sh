@@ -7,7 +7,7 @@ if [ "$CHECK_RESULTS_EVERY_SECONDS" == "NONE" ] || [ "$CHECK_RESULTS_EVERY_SECON
 	done
 fi
 
-if echo $CHECK_RESULTS_EVERY_SECONDS | egrep -q '^[0-9]+$'; then
+if echo $CHECK_RESULTS_EVERY_SECONDS | grep -E -q '^[0-9]+$'; then
 	echo "Overriding configuration"
 	SECONDS_TO_WAIT=$CHECK_RESULTS_EVERY_SECONDS
 else

@@ -2,7 +2,7 @@ ARG NODE_VERSION=22
 ARG BUILD_DATE
 ARG BUILD_VERSION
 ARG BUILD_REF
-ARG ALLURE_RELEASE=3.4.0
+ARG ALLURE_RELEASE=3.3.1
 ARG UID=1000
 ARG GID=1000
 ARG PYTHON_VERSION=3.13 # Only used in dev_stage for pylint
@@ -34,7 +34,7 @@ ARG GID
 
 LABEL org.label-schema.build-date=${BUILD_DATE} \
     org.label-schema.docker.dockerfile="docker/Dockerfile" \
-    org.label-schema.license="MIT" \
+    org.label-schema.license="Apache-2.0" \
     org.label-schema.name="Allure Framework" \
     org.label-schema.version=${BUILD_VERSION} \
     org.label-schema.description="Allure Report is a flexible multi-language test report tool." \
@@ -42,13 +42,14 @@ LABEL org.label-schema.build-date=${BUILD_DATE} \
     org.label-schema.vcs-ref=${BUILD_REF} \
     org.label-schema.vcs-type="Git" \
     org.label-schema.vcs-url="https://github.com/Intellon/allure-docker-service" \
-    authors="Frank Escobar <fescobar.systems@gmail.com>"
+    authors="Intellon <development@intellon.io>"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       tzdata \
       nano \
       curl \
+      procps \
       python3 \
       python3-pip && \
     ln -sf /usr/bin/python3 /usr/bin/python && \

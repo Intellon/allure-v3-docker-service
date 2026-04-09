@@ -3,7 +3,7 @@
       "tags":[
          "Security"
       ],
-      "summary":"Refresh (from version 2.13.5)",
+      "summary":"Refresh",
       "parameters":[
          {
             "in":"header",
