@@ -1,0 +1,4 @@
+allure-docker-api/static/swagger/swagger_security.json
+.data/
+/.idea/
+/docs/superpowers/
