@@ -137,7 +137,6 @@ PROTECTED_ENDPOINTS = [
 ]
 
 GENERATE_REPORT_PROCESS = '{}/generateAllureReport.sh'.format(os.environ['ROOT'])
-KEEP_HISTORY_PROCESS = '{}/keepAllureHistory.sh'.format(os.environ['ROOT'])
 CLEAN_HISTORY_PROCESS = '{}/cleanAllureHistory.sh'.format(os.environ['ROOT'])
 CLEAN_RESULTS_PROCESS = '{}/cleanAllureResults.sh'.format(os.environ['ROOT'])
 RENDER_EMAIL_REPORT_PROCESS = '{}/renderEmailableReport.sh'.format(os.environ['ROOT'])
@@ -984,12 +983,10 @@ def generate_report_endpoint():
         if execution_type is None or not execution_type:
             execution_type = ''
 
-        check_process(KEEP_HISTORY_PROCESS, project_id)
         check_process(GENERATE_REPORT_PROCESS, project_id)
 
         exec_store_results_process = '1'
 
-        call([KEEP_HISTORY_PROCESS, project_id, ORIGIN])
         response = subprocess.Popen([
             GENERATE_REPORT_PROCESS, exec_store_results_process,
             project_id, ORIGIN, execution_name, execution_from, execution_type],

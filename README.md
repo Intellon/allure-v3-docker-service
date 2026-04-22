@@ -4,56 +4,41 @@
 
 Docker container for [Allure 3](https://github.com/allure-framework/allure3) test reporting. Automatically detects new test results and generates reports, or accepts results via REST API.
 
-## Quick Start
+**Image:** `ghcr.io/intellon/allure-docker-service`
 
-### Build and run locally
+## Usage
 
-```sh
-git clone https://github.com/Intellon/allure-docker-service.git
-cd allure-docker-service
-docker build -f docker/Dockerfile -t allure-docker-service --build-arg ALLURE_RELEASE=3.3.1 .
-docker run -d --name allure -p 7272:5050 \
-  -e CHECK_RESULTS_EVERY_SECONDS=3 \
-  -e KEEP_HISTORY=1 \
-  -v ${PWD}/allure-results:/app/allure-results \
-  allure-docker-service
+### Docker Compose
+
+```yaml
+services:
+  allure:
+    image: "ghcr.io/intellon/allure-docker-service"
+    environment:
+      CHECK_RESULTS_EVERY_SECONDS: NONE
+      KEEP_HISTORY: 1
+      KEEP_HISTORY_LATEST: 12
+      SECURITY_ENABLED: 0
+    ports:
+      - "7272:5050"
+    volumes:
+      - ./projects:/app/projects
+
+  allure-ui:
+    image: "ghcr.io/intellon/allure-docker-service-ui"
+    environment:
+      ALLURE_DOCKER_PUBLIC_API_URL: "http://localhost:7272"
+    ports:
+      - "7474:5252"
 ```
 
-### Or use Docker Compose
-
 ```sh
-docker compose -f docker-compose-dev.yml up --build
+docker compose up -d
 ```
 
-### Open in browser
-
-| Endpoint | URL |
-|----------|-----|
-| API Version | http://localhost:7272/allure-docker-service/version |
-| Swagger UI | http://localhost:7272/allure-docker-service/swagger |
-| Latest Report | http://localhost:7272/allure-docker-service/latest-report |
-
-### Stop
-
-```sh
-docker stop allure && docker rm allure
-```
-
----
-
-## Container Registry
-
-- Image: `ghcr.io/intellon/allure-docker-service`
-- Architectures: amd64, arm64
-
-```sh
-docker pull ghcr.io/intellon/allure-docker-service:latest
-docker run -d -p 7272:5050 ghcr.io/intellon/allure-docker-service:latest
-```
-
----
-
-## Configuration
+- **API:** http://localhost:7272/allure-docker-service/swagger
+- **UI:** http://localhost:7474/allure-docker-service-ui
+- **Latest Report:** http://localhost:7272/allure-docker-service/latest-report
 
 ### Environment Variables
 
@@ -61,7 +46,7 @@ docker run -d -p 7272:5050 ghcr.io/intellon/allure-docker-service:latest
 |----------|---------|-------------|
 | `CHECK_RESULTS_EVERY_SECONDS` | `NONE` | Seconds between result checks. `NONE` = manual/API only |
 | `KEEP_HISTORY` | `0` | Set to `1` to preserve report history and trends |
-| `KEEP_HISTORY_LATEST` | `20` | Number of historical reports to keep |
+| `KEEP_HISTORY_LATEST` | `30` | Max history entries kept in trend + max archived report snapshots. Any positive integer accepted |
 | `SECURITY_ENABLED` | `0` | Set to `1` to enable JWT authentication |
 | `SECURITY_USER` | - | Admin username (required when security enabled) |
 | `SECURITY_PASS` | - | Admin password (required when security enabled) |
@@ -77,64 +62,59 @@ docker run -d -p 7272:5050 ghcr.io/intellon/allure-docker-service:latest
 ### Volumes
 
 | Container Path | Purpose |
-|---------------|---------|
+|----------------|---------|
 | `/app/allure-results` | Mount your test results here (single project) |
 | `/app/default-reports` | Generated reports output |
 | `/app/projects` | Mount here for multi-project setup |
 
----
+## Local Development
 
-## Usage
+### Prerequisites
+- [Docker](https://docs.docker.com/get-docker/)
+- Git
 
-### Single Project
-
-Mount your `allure-results` directory and the service auto-generates reports:
+### Start backend + UI via Docker Compose
+```sh
+docker compose -f docker-compose-dev.yml up -d --build
+```
+- **Allure Backend:** http://localhost:7272
+- **Allure UI:** http://localhost:7474/allure-docker-service-ui
 
 ```sh
+# View logs
+docker compose -f docker-compose-dev.yml logs -f
+
+# Stop
+docker compose -f docker-compose-dev.yml down
+```
+
+The dev compose file builds the image from `docker/Dockerfile` using `ALLURE_RELEASE=3.3.1`, so local changes under `allure-docker-api/` and `allure-docker-scripts/` are picked up on `--build`.
+
+## Local Docker Build & Test
+
+Build and run only locally (without pushing to any registry):
+```sh
+# Build
+docker build -t allure-docker-service \
+  -f docker/Dockerfile \
+  --build-arg ALLURE_RELEASE=3.3.1 .
+
+# Run
 docker run -d --name allure -p 7272:5050 \
   -e CHECK_RESULTS_EVERY_SECONDS=3 \
   -e KEEP_HISTORY=1 \
-  -v ${PWD}/allure-results:/app/allure-results \
-  -v ${PWD}/allure-reports:/app/default-reports \
+  -v "$(pwd)/allure-results:/app/allure-results" \
   allure-docker-service
+
+# Test
+curl http://localhost:7272/allure-docker-service/version
 ```
+Open http://localhost:7272/allure-docker-service/swagger
 
-### Multiple Projects
-
-For multiple projects, use `CHECK_RESULTS_EVERY_SECONDS=NONE` and manage via API:
-
+Stop:
 ```sh
-docker run -d --name allure -p 7272:5050 \
-  -e CHECK_RESULTS_EVERY_SECONDS=NONE \
-  -e KEEP_HISTORY=1 \
-  -v ${PWD}/projects:/app/projects \
-  allure-docker-service
+docker rm -f allure
 ```
-
-Create a project:
-```sh
-curl -X POST http://localhost:7272/allure-docker-service/projects \
-  -H 'Content-Type: application/json' \
-  -d '{"id": "my-project"}'
-```
-
-### Docker Compose
-
-```yaml
-services:
-  allure:
-    image: "ghcr.io/intellon/allure-docker-service"
-    environment:
-      CHECK_RESULTS_EVERY_SECONDS: 3
-      KEEP_HISTORY: 1
-    ports:
-      - "7272:5050"
-    volumes:
-      - ./allure-results:/app/allure-results
-      - ./allure-reports:/app/default-reports
-```
-
----
 
 ## API
 
@@ -196,8 +176,6 @@ curl -X POST http://localhost:7272/allure-docker-service/send-results \
 curl http://localhost:7272/allure-docker-service/generate-report
 ```
 
----
-
 ## Security
 
 Enable JWT authentication:
@@ -225,68 +203,44 @@ curl http://localhost:7272/allure-docker-service/generate-report -b cookies.txt
 
 **Roles:** `admin` has full access, `viewer` has read-only access.
 
----
+## Build & Push to GHCR
 
-## Development
+### CI/CD
+The pipeline runs automatically on version tags and can be triggered manually. It builds multi-arch (amd64, arm64) and pushes to `ghcr.io/intellon/allure-docker-service`.
 
-### Build image
+**Automatic** — push a version tag:
 ```sh
-docker build -f docker/Dockerfile -t allure-docker-service --build-arg ALLURE_RELEASE=3.3.1 .
+git tag v3.3.1
+git push origin v3.3.1
 ```
 
-### Run container
+**Manual** — trigger via GitHub UI:
+Go to **Actions > Allure Docker Service Workflow > Run workflow**, enter the version (e.g. `3.3.1`) and choose whether to tag as `latest`.
+
+**Prerequisite:** Enable **Settings > Actions > General > Workflow permissions > Read and write permissions** in your GitHub repository.
+
+### Manual
+
 ```sh
-docker run -d --name allure -p 7272:5050 allure-docker-service
-```
+# 1. Login
+echo $GITHUB_TOKEN | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
 
-### Develop with Docker Compose
-```sh
-docker compose -f docker-compose-dev.yml up --build
-```
-
-### Access container
-```sh
-docker exec -it allure bash
-```
-
-### View logs
-```sh
-docker logs -f allure
-```
-
-### Security scan
-```sh
-docker scout cves allure-docker-service
-```
-
----
-
-## Manual Push to GHCR
-
-### 1. Login
-```sh
-echo "${GITHUB_TOKEN}" | docker login ghcr.io -u ${GITHUB_USERNAME} --password-stdin
-```
-Create a PAT at https://github.com/settings/tokens with `write:packages` scope.
-
-### 2. Build and tag
-```sh
-docker build --no-cache \
-  -t ghcr.io/intellon/allure-docker-service:3.3.1 \
+# 2. Build
+docker build -t ghcr.io/intellon/allure-docker-service:3.3.1 \
   -f docker/Dockerfile \
   --build-arg ALLURE_RELEASE=3.3.1 \
   --build-arg BUILD_VERSION=3.3.1 \
-  .
-docker tag ghcr.io/intellon/allure-docker-service:3.3.1 ghcr.io/intellon/allure-docker-service:latest
-```
+  --build-arg BUILD_REF=$(git rev-parse --short HEAD) \
+  --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') .
 
-### 3. Push
-```sh
+docker tag ghcr.io/intellon/allure-docker-service:3.3.1 ghcr.io/intellon/allure-docker-service:latest
+
+# 3. Push
 docker push ghcr.io/intellon/allure-docker-service:3.3.1
 docker push ghcr.io/intellon/allure-docker-service:latest
 ```
 
-### 4. Multi-architecture build
+**Multi-architecture build:**
 ```sh
 docker buildx create --name multiarch --use
 docker buildx build --no-cache \
@@ -295,36 +249,10 @@ docker buildx build --no-cache \
   -t ghcr.io/intellon/allure-docker-service:latest \
   -f docker/Dockerfile \
   --build-arg ALLURE_RELEASE=3.3.1 \
-  --push \
-  .
+  --push .
 ```
 
-### 5. Logout
-```sh
-docker logout ghcr.io
-```
-
----
-
-## CI/CD
-
-The pipeline runs only on the `main` branch. Two ways to publish:
-
-### Automatic (via Git tag)
-```sh
-git tag v3.3.1
-git push origin v3.3.1
-```
-
-### Manual (via GitHub UI)
-1. Go to `Actions > Allure Docker Service Workflow > Run workflow`
-2. Enter the version (e.g. `3.3.1`)
-3. Check "Tag as latest?" if desired
-4. Click "Run workflow"
-
-**Prerequisite:** Enable `Settings > Actions > General > Workflow permissions > Read and write permissions` in your GitHub repository.
-
----
+**GitHub Token:** Settings > Developer Settings > Personal Access Tokens (classic) with scopes `write:packages`, `read:packages`.
 
 ## License
 

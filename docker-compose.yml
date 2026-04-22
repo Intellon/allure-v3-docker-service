@@ -1,0 +1,29 @@
+services:
+  allure-docker-service-ui:
+    image: "ghcr.io/intellon/allure-docker-service-ui"
+    environment:
+      ALLURE_DOCKER_PUBLIC_API_URL: "http://localhost:7272"
+      ALLURE_DOCKER_PUBLIC_API_URL_PREFIX: ""
+      #URL_PREFIX: "/my-prefix"
+    ports:
+      - "7474:5252"
+
+  allure:
+    image: "ghcr.io/intellon/allure-docker-service"
+    environment:
+      CHECK_RESULTS_EVERY_SECONDS: NONE
+      KEEP_HISTORY: 1
+      KEEP_HISTORY_LATEST: 12
+      SECURITY_ENABLED: 0
+      #SECURITY_USER: my_username
+      #SECURITY_PASS: my_password
+      #SECURITY_VIEWER_USER: "view_user"
+      #SECURITY_VIEWER_PASS: "view_pass"
+      #MAKE_VIEWER_ENDPOINTS_PUBLIC: 1
+      #URL_PREFIX: /my-prefix
+      #ACCESS_TOKEN_EXPIRES_IN_SECONDS: 10
+      #REFRESH_TOKEN_EXPIRES_IN_SECONDS: 10
+    ports:
+      - "7272:5050"
+    volumes:
+      - ${PWD}/projects:/app/projects

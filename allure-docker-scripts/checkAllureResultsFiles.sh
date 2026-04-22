@@ -46,7 +46,6 @@ do
             if [ "$API_PROCESSES_SIZE" -le "0" ]; then
                 echo "Automatic Execution in Progress for PROJECT_ID: $KEY..."
                 PREV_RESULTS[$KEY]=${RESULTS[$KEY]}
-                $ROOT/keepAllureHistory.sh $KEY
                 $ROOT/generateAllureReport.sh $EXEC_STORE_RESULTS_PROCESS $KEY
                 $ROOT/renderEmailableReport.sh $KEY
             else
