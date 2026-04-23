@@ -47,7 +47,6 @@ do
                 echo "Automatic Execution in Progress for PROJECT_ID: $KEY..."
                 PREV_RESULTS[$KEY]=${RESULTS[$KEY]}
                 $ROOT/generateAllureReport.sh $EXEC_STORE_RESULTS_PROCESS $KEY
-                $ROOT/renderEmailableReport.sh $KEY
             else
                 echo "API Processes in progress for PROJECT_ID: $KEY - Automatic Execution Postponed"
             fi

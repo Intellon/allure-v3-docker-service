@@ -135,8 +135,6 @@ docker rm -f allure
 | GET | `/allure-docker-service/latest-report` | Redirect to latest report |
 | GET | `/allure-docker-service/clean-results` | Clean results directory |
 | GET | `/allure-docker-service/clean-history` | Clean history |
-| GET | `/allure-docker-service/emailable-report/render` | Render emailable report |
-| GET | `/allure-docker-service/emailable-report/export` | Export emailable report |
 | GET | `/allure-docker-service/report/export` | Export full report as ZIP |
 
 ### Project Endpoints

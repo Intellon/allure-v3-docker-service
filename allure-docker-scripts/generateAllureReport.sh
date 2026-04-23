@@ -16,9 +16,9 @@ PROJECT_HISTORY_FILE=$PROJECT_ROOT/history.jsonl
 
 if [ "$(ls $PROJECT_REPORTS | wc -l)" != "0" ]; then
     if [ -e "$PROJECT_REPORTS/latest" ]; then
-        LAST_REPORT_PATH_DIRECTORY=$(ls -td $PROJECT_REPORTS/* | grep -wv $PROJECT_REPORTS/latest | grep -v $EMAILABLE_REPORT_FILE_NAME | head -1)
+        LAST_REPORT_PATH_DIRECTORY=$(ls -td $PROJECT_REPORTS/* | grep -wv $PROJECT_REPORTS/latest | head -1)
     else
-        LAST_REPORT_PATH_DIRECTORY=$(ls -td $PROJECT_REPORTS/* | grep -v $EMAILABLE_REPORT_FILE_NAME | head -1)
+        LAST_REPORT_PATH_DIRECTORY=$(ls -td $PROJECT_REPORTS/* | head -1)
     fi
 fi
 
@@ -76,7 +76,7 @@ else
 fi
 
 allure awesome \
-    --report-name "Allure Report" \
+    --report-name "$PROJECT_ID" \
     --report-language en \
     $HISTORY_ARGS \
     -o $PROJECT_REPORTS/latest \

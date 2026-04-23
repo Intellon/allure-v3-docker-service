@@ -4,7 +4,6 @@ from functools import wraps
 from subprocess import call
 import base64
 import datetime
-import glob
 import io
 import json
 import os
@@ -139,32 +138,17 @@ PROTECTED_ENDPOINTS = [
 GENERATE_REPORT_PROCESS = '{}/generateAllureReport.sh'.format(os.environ['ROOT'])
 CLEAN_HISTORY_PROCESS = '{}/cleanAllureHistory.sh'.format(os.environ['ROOT'])
 CLEAN_RESULTS_PROCESS = '{}/cleanAllureResults.sh'.format(os.environ['ROOT'])
-RENDER_EMAIL_REPORT_PROCESS = '{}/renderEmailableReport.sh'.format(os.environ['ROOT'])
 ALLURE_VERSION = os.environ['ALLURE_VERSION']
 STATIC_CONTENT = os.environ['STATIC_CONTENT']
 PROJECTS_DIRECTORY = os.environ['STATIC_CONTENT_PROJECTS']
-EMAILABLE_REPORT_FILE_NAME = os.environ['EMAILABLE_REPORT_FILE_NAME']
 ORIGIN = 'api'
 SECURITY_SPECS_PATH = 'swagger/security_specs'
 
 REPORT_INDEX_FILE = 'index.html'
-DEFAULT_TEMPLATE = 'default.html'
 LANGUAGE_TEMPLATE = 'select_language.html'
 LANGUAGES = ["en", "ru", "zh", "de", "nl", "he", "br", "pl", "ja", "es", "kr", "fr", "az"]
 GLOBAL_CSS = "https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/cosmo/bootstrap.css"
-EMAILABLE_REPORT_CSS = GLOBAL_CSS
-EMAILABLE_REPORT_TITLE = "Emailable Report"
 API_RESPONSE_LESS_VERBOSE = 0
-
-if "EMAILABLE_REPORT_CSS_CDN" in os.environ:
-    EMAILABLE_REPORT_CSS = os.environ['EMAILABLE_REPORT_CSS_CDN']
-    LOGGER.info('Overriding CSS for Emailable Report. EMAILABLE_REPORT_CSS_CDN=%s',
-                EMAILABLE_REPORT_CSS)
-
-if "EMAILABLE_REPORT_TITLE" in os.environ:
-    EMAILABLE_REPORT_TITLE = os.environ['EMAILABLE_REPORT_TITLE']
-    LOGGER.info('Overriding Title for Emailable Report. EMAILABLE_REPORT_TITLE=%s',
-                EMAILABLE_REPORT_TITLE)
 
 if "API_RESPONSE_LESS_VERBOSE" in os.environ:
     try:
@@ -991,7 +975,6 @@ def generate_report_endpoint():
             GENERATE_REPORT_PROCESS, exec_store_results_process,
             project_id, ORIGIN, execution_name, execution_from, execution_type],
                                     stdout=subprocess.PIPE).communicate()[0]
-        call([RENDER_EMAIL_REPORT_PROCESS, project_id, ORIGIN])
 
         build_order = 'latest'
         for line in response.decode("utf-8").split("\n"):
@@ -1118,104 +1101,6 @@ def clean_results_endpoint():
         resp.status_code = 200
 
     return resp
-
-@app.route("/emailable-report/render", strict_slashes=False)
-@app.route("/allure-docker-service/emailable-report/render", strict_slashes=False)
-@jwt_required
-def emailable_report_render_endpoint():
-    try:
-        project_id = resolve_project(request.args.get('project_id'))
-        if is_existent_project(project_id) is False:
-            body = {
-                'meta_data': {
-                    'message' : "project_id '{}' not found".format(project_id)
-                }
-            }
-            resp = jsonify(body)
-            resp.status_code = 404
-            return resp
-
-        check_process(GENERATE_REPORT_PROCESS, project_id)
-
-        project_path = get_project_path(project_id)
-        tcs_latest_report_project = "{}/reports/latest/data/test-cases/*.json".format(project_path)
-
-        files = glob.glob(tcs_latest_report_project)
-        files.sort(key=os.path.getmtime, reverse=True)
-        test_cases = []
-        for file_name in files:
-            with open(file_name) as file:
-                json_string = file.read()
-                LOGGER.debug("----TestCase-JSON----")
-                LOGGER.debug(json_string)
-                test_case = json.loads(json_string)
-                if test_case["hidden"] is False:
-                    test_cases.append(test_case)
-
-        server_url = url_for('latest_report_endpoint', project_id=project_id, _external=True)
-
-        if "SERVER_URL" in os.environ:
-            server_url = os.environ['SERVER_URL']
-
-        report = render_template(DEFAULT_TEMPLATE, css=EMAILABLE_REPORT_CSS,
-                                 title=EMAILABLE_REPORT_TITLE, projectId=project_id,
-                                 serverUrl=server_url, testCases=test_cases)
-
-        emailable_report_path = '{}/reports/{}'.format(project_path, EMAILABLE_REPORT_FILE_NAME)
-        file = None
-        try:
-            file = open(emailable_report_path, "w")
-            file.write(report)
-        finally:
-            if file is not None:
-                file.close()
-    except Exception as ex:
-        body = {
-            'meta_data': {
-                'message' : str(ex)
-            }
-        }
-        resp = jsonify(body)
-        resp.status_code = 400
-        return resp
-    else:
-        return report
-
-@app.route("/emailable-report/export", strict_slashes=False)
-@app.route("/allure-docker-service/emailable-report/export", strict_slashes=False)
-@jwt_required
-def emailable_report_export_endpoint():
-    try:
-        project_id = resolve_project(request.args.get('project_id'))
-        if is_existent_project(project_id) is False:
-            body = {
-                'meta_data': {
-                    'message' : "project_id '{}' not found".format(project_id)
-                }
-            }
-            resp = jsonify(body)
-            resp.status_code = 404
-            return resp
-
-        check_process(GENERATE_REPORT_PROCESS, project_id)
-
-        project_path = get_project_path(project_id)
-        emailable_report_path = '{}/reports/{}'.format(project_path, EMAILABLE_REPORT_FILE_NAME)
-
-        report = send_file(emailable_report_path, as_attachment=True)
-    except Exception as ex:
-        message = str(ex)
-
-        body = {
-            'meta_data': {
-                'message' : message
-            }
-        }
-        resp = jsonify(body)
-        resp.status_code = 400
-        return resp
-    else:
-        return report
 
 @app.route("/report/export", strict_slashes=False)
 @app.route("/allure-docker-service/report/export", strict_slashes=False)
